@@ -1,9 +1,10 @@
-name: CI/CD .Net Core (docker)
+name: CI/CD eShop
 
 on:
-  workflow_dispatch:
   push:
-    paths: .github/workflows/ci-cd.yml
+    branches: [ main, dev/tests-deploy-web-app ]
+  pull_request:
+    branches: [ main ]  
 
 env:
   build_config: Release      
@@ -13,22 +14,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ hashFiles('src/Web/Dockerfile') }}
-    
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v1
-      with:
-        version: latest
-
     - name: Test with dotnet
       run: dotnet test ./eShopOnWeb.sln --configuration $build_config
     
@@ -43,8 +31,7 @@ jobs:
         path: .
         dockerfile: src/Web/Dockerfile
         add_git_labels: true
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+        push: ${{ github.event_name != 'pull_request' }}
         
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
@@ -72,10 +59,10 @@ jobs:
         path: arm
         
   deploy:       
-   # if: github.ref == 'refs/heads/master' 
+    if: github.ref == 'refs/heads/main' 
     needs: build
     runs-on: ubuntu-latest  
-    environment: dockerwebapp
+    environment: devapp
     env:
       RESOURCE_GROUP: NetCore_GIthubCI_CD_RG
     steps:
@@ -105,12 +92,13 @@ jobs:
         template: arm_template/netcore_rg_arm.json       
         deploymentMode: Incremental
         deploymentName: deploy-docker-${{ github.run_number  }}
-        parameters: catalogConnstring="${{ secrets.CATALOG_DB_CONNSTRING }}" identityConnstring="${{ secrets.IDENTITY_DB_CONNSTRING }}" sites_netcoregithub_name=netcoreghdck serverfarms_netcoregithubplan_name=netcoregithubplan sqlserver_password=${{ secrets.DB_PASSWORD }} dockerRegistryUrl=${{ env.registry_name }} dockerRegistryUsername=${{ secrets.ACR_USER_NAME }} dockerRegistryPassword=${{ secrets.ACR_PASSWORD }} dockerImage=${{ env.registry_name }}/${{ env.repository_name }}:${{ github.run_number }}
+        parameters: catalogConnstring="${{ secrets.CATALOG_DB_CONNSTRING }}" identityConnstring="${{ secrets.IDENTITY_DB_CONNSTRING }}" sites_netcoregithub_name=netcoreghdck serverfarms_netcoregithubplan_name=netcoregithubplan sqlserver_password=${{ secrets.DB_PASSWORD }}
 
-  deploydb:         
+  deploydb:
+    if: github.ref == 'refs/heads/main'          
     needs: deploy
     runs-on: windows-latest  
-    environment: database
+    environment: devdatabase
     
     steps:      
     - name: Download scripts

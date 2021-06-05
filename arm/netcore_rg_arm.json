@@ -21,18 +21,6 @@
       "type": "string",
       "defaultValue": "westeurope"
     },
-    "dockerRegistryPassword": {
-      "type": "string"
-    },
-    "dockerRegistryUsername": {
-      "type": "string"
-    },
-    "dockerRegistryUrl": {
-      "type": "string"
-    },
-    "dockerImage": {
-      "type": "string"
-    },
     "catalogConnstring": {
       "type": "securestring"
     },
@@ -183,30 +171,14 @@
               "type": "SQLAzure"
             }
           ],
-          "appSettings": [
-            {
-              "name": "DOCKER_REGISTRY_SERVER_URL",
-              "value": "[parameters('dockerRegistryUrl')]"
-            },
-            {
-              "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-              "value": "[parameters('dockerRegistryUsername')]"
-            },
-            {
-              "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-              "value": "[parameters('dockerRegistryPassword')]"
-            },
-            {
-              "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-              "value": "false"
-            },
+          "appSettings": [         
             {
               "name": "DataProtection__StorageConnString",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('sites_netcoregithub_name'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('sites_netcoregithub_name')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
             }
 
           ],
-          "linuxFxVersion": "[concat('DOCKER|',parameters('dockerImage'))]"
+          "linuxFxVersion": "DOCKER|nginx:latest"
 
         },
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_netcoregithubplan_name'))]",
