@@ -27,7 +27,7 @@ jobs:
         username: ${{ secrets.ACR_USER_NAME }}
         password: ${{ secrets.ACR_PASSWORD }}
         repository: ${{ env.repository_name }}
-        tags: ${{ github.run_number }}
+        tags: ${{ github.sha }}
         path: .
         dockerfile: src/Web/Dockerfile
         add_git_labels: true
@@ -91,9 +91,14 @@ jobs:
         resourceGroupName: ${{ env.RESOURCE_GROUP }}
         template: arm_template/netcore_rg_arm.json       
         deploymentMode: Incremental
-        deploymentName: deploy-docker-${{ github.run_number  }}
+        deploymentName: deploy-docker-${{ github.sha  }}
         parameters: catalogConnstring="${{ secrets.CATALOG_DB_CONNSTRING }}" identityConnstring="${{ secrets.IDENTITY_DB_CONNSTRING }}" sites_netcoregithub_name=netcoreghdck serverfarms_netcoregithubplan_name=netcoregithubplan sqlserver_password=${{ secrets.DB_PASSWORD }}
-
+    
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'netcoreghdck'
+        images: '${{ env.registry_name }}/${{ env.repository_name }}:${{ github.sha }}'
+        
   deploydb:
     #if: github.ref == 'refs/heads/main'          
     needs: deploy

@@ -177,8 +177,7 @@
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('sites_netcoregithub_name'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('sites_netcoregithub_name')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
             }
 
-          ],
-          "linuxFxVersion": "DOCKER|nginx:latest"
+          ]
 
         },
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_netcoregithubplan_name'))]",
