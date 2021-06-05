@@ -59,7 +59,7 @@ jobs:
         path: arm
         
   deploy:       
-    if: github.ref == 'refs/heads/main' 
+    #if: github.ref == 'refs/heads/main' 
     needs: build
     runs-on: ubuntu-latest  
     environment: devapp
@@ -95,7 +95,7 @@ jobs:
         parameters: catalogConnstring="${{ secrets.CATALOG_DB_CONNSTRING }}" identityConnstring="${{ secrets.IDENTITY_DB_CONNSTRING }}" sites_netcoregithub_name=netcoreghdck serverfarms_netcoregithubplan_name=netcoregithubplan sqlserver_password=${{ secrets.DB_PASSWORD }}
 
   deploydb:
-    if: github.ref == 'refs/heads/main'          
+    #if: github.ref == 'refs/heads/main'          
     needs: deploy
     runs-on: windows-latest  
     environment: devdatabase
